@@ -1,18 +1,6 @@
-'''
-opciones de librerias
-
-geopy: To geolocate a query to an address, coordinates and measuring distances
-~> pip install geopy
-
-Folium:Para graficar las posiciones simuladas, nos permite ver la posicion en un grafico 2d en tiempo real
-~> pip install folium
-
-'''
-
 import time
 import random
 import folium
-import geopy    
 
 # Punto inicial (Lat, Long)
 initial_position = (51.5074, -0.1278)  # Londres como ejemplo
@@ -23,33 +11,43 @@ mapa = folium.Map(location=initial_position, zoom_start=13)
 # Añadir marcador inicial
 folium.Marker(initial_position, popup="Posición inicial").add_to(mapa)
 
-# Guardar el mapa en un archivo HTML
-mapa.save("cube_sat_mapa.html")
+# Guardar el mapa inicial en un archivo HTML
+mapa.save("cube_sat_mapa_inicial.html")
 
-def simulate_gps_movement(start_pos, num_points=100):
-    positions = [start_pos]
-    
-    for _ in range(num_points):
-        # Simulación de movimiento pequeño (en este caso, alrededor de la posición inicial)
-        new_lat = positions[-1][0] + random.uniform(-0.0005, 0.0005)
-        new_long = positions[-1][1] + random.uniform(-0.0005, 0.0005)
-        new_position = (new_lat, new_long)
-        positions.append(new_position)
-        time.sleep(0.1)  # Simular recepción de datos cada 100ms
-    
-    return positions
+# Función para generar una nueva posición simulada
+def generate_random_position(last_position):
+    # Variar latitud y longitud ligeramente
+    new_lat = last_position[0] + random.uniform(-0.001, 0.001)  # Cambios pequeños
+    new_long = last_position[1] + random.uniform(-0.001, 0.001)
+    return (new_lat, new_long)
 
-# Generar posiciones simuladas
-positions = simulate_gps_movement(initial_position)
+# Lista para almacenar las posiciones y formar la trayectoria
+positions = [initial_position]
 
-# Crear un nuevo mapa con las posiciones simuladas
-mapa_trayectoria = folium.Map(location=initial_position, zoom_start=13)
+# Usar el bucle for o while para generar nuevas coordenadas
+current_position = initial_position
 
-# Añadir marcadores de trayectoria
-for pos in positions:
-    folium.Marker(pos).add_to(mapa_trayectoria)
+for i in range(10):  # Simulamos 10 movimientos
+    # Generar una nueva posición
+    new_position = generate_random_position(current_position)
+    positions.append(new_position)
 
-# Guardar el nuevo mapa con la trayectoria
-mapa_trayectoria.save("cube_sat_trayectoria.html")
+    # Mostrar la posición actual (opcional)
+    print(f"Posición {i+1}: {new_position}")
 
-print("Trayectoria guardada en cube_sat_trayectoria.html")
+    # Añadir la nueva posición al mapa
+    folium.Marker(new_position, popup=f"Posición {i+1}").add_to(mapa)
+
+    # Dibujar la línea entre la posición anterior y la nueva posición
+    folium.PolyLine(positions, color="blue", weight=2.5, opacity=1).add_to(mapa)
+
+    # Actualizar la posición actual
+    current_position = new_position
+
+    # Esperar un segundo antes de generar la siguiente posición
+    time.sleep(1)
+
+# Guardar el nuevo mapa con las posiciones y líneas
+mapa.save("cube_sat_trayectoria_con_lineas.html")
+
+print("Trayectoria guardada en cube_sat_trayectoria_con_lineas.html")
