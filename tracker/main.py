@@ -4,7 +4,7 @@ import folium
 from geopy.distance import geodesic
 
 # Punto inicial (Lat, Long, Alt)
-initial_position = (51.5074, -0.1278, 100)  # Londres con 100 metros de altitud como ejemplo
+initial_position = (-34.5895, -58.4665, 30)  # CABA con 100 metros de altitud como ejemplo
 
 # Crear un mapa centrado en la posición inicial (ignora la altitud para visualización en el mapa)
 mapa = folium.Map(location=initial_position[:2], zoom_start=13)
@@ -26,10 +26,10 @@ def generate_random_position(last_position):
 # Lista para almacenar las posiciones y formar la trayectoria
 positions = [initial_position]
 
-# Usar el bucle for o while para generar nuevas coordenadas
+# Usar el bucle para generar nuevas coordenadas
 current_position = initial_position
 
-for i in range(10):  # Simulamos 10 movimientos
+for i in range(10):  # 10 movimientos
     # Generar una nueva posición
     new_position = generate_random_position(current_position)
     positions.append(new_position)
@@ -40,16 +40,16 @@ for i in range(10):  # Simulamos 10 movimientos
     # Calcular la diferencia de altitud
     altitude_difference = abs(current_position[2] - new_position[2])
 
-    # Calcular la distancia total 3D usando el teorema de Pitágoras
+    # Calcular la distancia total
     distance_3d = (distance_2d**2 + altitude_difference**2) ** 0.5
 
-    # Mostrar la distancia calculada por consola
+    # Mostrar la distancia por consola
     print(f"Distancia 3D entre punto {i} y punto {i+1}: {distance_3d:.2f} metros")
 
     # Añadir la nueva posición al mapa (latitud y longitud)
     folium.Marker(new_position[:2], popup=f"Posición {i+1} (Altitud: {new_position[2]:.2f}m)").add_to(mapa)
 
-    # Dibujar la línea entre la posición anterior y la nueva posición (solo en el plano 2D)
+    # Dibujar la línea entre la posición anterior y la nueva posición
     folium.PolyLine([pos[:2] for pos in positions], color="blue", weight=2.5, opacity=1).add_to(mapa)
 
     # Actualizar la posición actual
